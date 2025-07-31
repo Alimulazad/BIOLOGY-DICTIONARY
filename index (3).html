@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Bio Dictionary (Bangla)</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #121212;
+      color: #ffffff;
+      padding: 20px;
+      margin: 0;
+    }
+    h1 {
+      text-align: center;
+      color: #00ff99;
+    }
+    #searchInput {
+      width: 100%;
+      padding: 10px;
+      font-size: 18px;
+      margin-bottom: 15px;
+      background-color: #1e1e1e;
+      border: 1px solid #333;
+      color: #fff;
+    }
+    #result {
+      background-color: #1e1e1e;
+      border-radius: 8px;
+      padding: 15px;
+      margin-top: 10px;
+    }
+    #result p {
+      color: #90ee90;
+    }
+    .dark-toggle {
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      padding: 8px 12px;
+      background: #333;
+      color: #00ff99;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .add-btn {
+      margin-top: 15px;
+      padding: 8px 12px;
+      background: #00ff99;
+      color: #000;
+      border: none;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+    /* Popup Styles */
+    .popup {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: #222;
+      color: white;
+      padding: 20px;
+      border-radius: 8px;
+      z-index: 10;
+      display: none;
+      width: 90%;
+      max-width: 400px;
+      box-shadow: 0 0 10px #000;
+    }
+    .popup input {
+      width: 100%;
+      margin: 8px 0;
+      padding: 8px;
+      background: #333;
+      border: 1px solid #555;
+      color: white;
+    }
+    .popup-buttons {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 10px;
+    }
+    .popup-buttons button {
+      padding: 8px 12px;
+      border: none;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+    .submit-btn {
+      background: #00ff99;
+      color: black;
+    }
+    .cancel-btn {
+      background: #555;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+
+  <button class="dark-toggle" onclick="toggleDarkMode()">🌙</button>
+
+  <h1>BIOLOGY DICTIONARY ( Bangla )</h1>
+  <input type="text" id="searchInput" placeholder="খুঁজুন..." oninput="searchWord()" />
+
+  <div id="result"></div>
+
+  <button class="add-btn" onclick="openPopup()">নতুন শব্দ যোগ করুন</button>
+
+  <!-- Popup Menu -->
+  <div class="popup" id="popup">
+    <input type="text" id="newWord" placeholder="শব্দ" />
+    <input type="text" id="newRoot" placeholder="মূল (যদি থাকে)" />
+    <input type="text" id="newMeaning" placeholder="অর্থ" />
+    <input type="text" id="newExample" placeholder="উদাহরণ" />
+    <div class="popup-buttons">
+      <button class="submit-btn" onclick="addWord()">✅ যুক্ত করুন</button>
+      <button class="cancel-btn" onclick="closePopup()">❌ বাতিল</button>
+    </div>
+  </div>
+
+  <!-- External Dictionary File -->
+  <script src="dictionary.js"></script>
+
+  <script>
+    function searchWord() {
+      const input = document.getElementById("searchInput").value.toLowerCase();
+      const resultDiv = document.getElementById("result");
+      resultDiv.innerHTML = "";
+
+      if (!input) return;
+
+      const matches = Object.keys(dictionary)
+        .filter(key => key.startsWith(input))
+        .slice(0, 5); // Max 5 suggestions
+
+      if (matches.length === 0) {
+        resultDiv.innerHTML = "<p>কোনো মিল পাওয়া যায়নি।</p>";
+        return;
+      }
+
+      matches.forEach(key => {
+        const word = dictionary[key];
+        const html = `
+          <p><strong>🔠 শব্দ:</strong> ${key}</p>
+          <p><strong>📚 মূল:</strong> ${word.root}</p>
+          <p><strong>📖 অর্থ:</strong> ${word.meaning}</p>
+          <p><strong>📝 উদাহরণ:</strong> ${word.example}</p>
+          <hr>
+        `;
+        resultDiv.innerHTML += html;
+      });
+    }
+
+    function openPopup() {
+      document.getElementById("popup").style.display = "block";
+    }
+
+    function closePopup() {
+      document.getElementById("popup").style.display = "none";
+    }
+
+    function addWord() {
+      const word = document.getElementById("newWord").value.toLowerCase();
+      const root = document.getElementById("newRoot").value;
+      const meaning = document.getElementById("newMeaning").value;
+      const example = document.getElementById("newExample").value;
+
+      if (word && meaning) {
+        dictionary[word] = {
+          root: root || "-",
+          meaning: meaning,
+          example: example || "-"
+        };
+        alert("✅ শব্দ যুক্ত হয়েছে!");
+        closePopup();
+        document.getElementById("searchInput").value = word;
+        searchWord();
+      } else {
+        alert("⚠️ শব্দ ও অর্থ পূরণ করুন।");
+      }
+    }
+
+    function toggleDarkMode() {
+      document.body.classList.toggle("dark");
+    }
+  </script>
+
+</body>
+</html>
