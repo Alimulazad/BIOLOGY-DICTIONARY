@@ -204,7 +204,67 @@
   root: "Peri (চারপাশ) + lymph (তরল)",
   meaning: "Cochlea-এর বাইরের অংশে থাকা তরল।",
   example: "Perilymph শব্দ কম্পন পরিবহন করে।"
-}
+},
+    "hematopoiesis": {
+  root: 'Hemato (রক্ত/কণিকা) + poiesis (তৈরি)',
+  meaning: 'রক্তকণিকা তৈরির প্রক্রিয়াকে হিমাটোপয়েসিস বলে।',
+  example: 'Hemopoietic stem cell থেকে hematopoiesis হয়।'
+},
+"erythropoiesis": {
+  root: 'Erythro (লোহিত কণিকা) + poiesis (তৈরি)',
+  meaning: 'RBC তৈরির প্রক্রিয়াকে এরিথ্রোপয়েসিস বলে।',
+  example: 'Erythropoietin হরমোন erythropoiesis নিয়ন্ত্রণ করে।'
+},
+"lymphopoiesis": {
+  root: 'Lympho (লসিকা) + poiesis (তৈরি)',
+  meaning: 'লসিকা কোষ তৈরির প্রক্রিয়াকে লিম্ফোপয়েসিস বলে।',
+  example: 'Lymphopoiesis lymph node এবং bone marrow-তে ঘটে।'
+},
+"ferritin": {
+  root: 'Ferri (আয়রন) + tin (প্রোটিন)',
+  meaning: 'Ferritin হলো এক ধরনের প্রোটিন যেখানে আয়রন সঞ্চিত থাকে।',
+  example: 'Ferritin লিভারে আয়রন জমা রাখতে সাহায্য করে।'
+},
+"thrombocyte": {
+  root: 'Thrombo (দলা/পিন্ড) + cyte (কোষ)',
+  meaning: 'রক্ত জমাট বাঁধায় সহায়ক কোষকে thrombocyte বলে।',
+  example: 'Thrombocyte রক্তপাত বন্ধ করতে গুরুত্বপূর্ণ।'
+},
+"platelet": {
+  root: 'Plate (চ্যাপ্টা চাকতির মতো) + let (ক্ষুদ্র)',
+  meaning: 'Platelet হলো ক্ষুদ্র চ্যাপ্টা কোষ যা রক্ত জমাটে সাহায্য করে।',
+  example: 'Platelet এর সংখ্যা কমে গেলে হেমোরেজ হতে পারে।'
+},
+"epithelium": {
+  root: 'Epi (বাইরের) + thelium (আবরণ)',
+  meaning: 'শরীর বা অঙ্গের বাইরের আবরণকে epithelium বলে।',
+  example: 'Epithelium ত্বক এবং অঙ্গপ্রত্যঙ্গকে রক্ষা করে।'
+},
+"endothelium": {
+  root: 'Endo (ভেতরের) + thelium (আবরণ)',
+  meaning: 'রক্তনালীর অভ্যন্তরীণ আবরণকে endothelium বলে।',
+  example: 'Endothelium রক্তচাপ ও রক্ত প্রবাহ নিয়ন্ত্রণে সাহায্য করে।'
+},
+"actin": {
+  root: 'Act (সুতা/ক্রিয়া) + in (প্রোটিন)',
+  meaning: 'Actin একটি সুতা সদৃশ প্রোটিন যা কোষ গঠন ও পেশির সংকোচনে ভূমিকা রাখে।',
+  example: 'Actin পেশি সঙ্কোচনের জন্য myosin-এর সাথে কাজ করে।'
+},
+"myosin": {
+  root: 'Myo (পেশি) + in (প্রোটিন)',
+  meaning: 'Myosin একটি প্রোটিন যা পেশি সঙ্কোচনে কাজ করে।',
+  example: 'Actin ও myosin একত্রে পেশি সংকোচন ঘটায়।'
+},
+"thrombosthenin": {
+  root: 'Thrombo (দলা/থ্রম্বাস) + sthenin (শক্তি)',
+  meaning: 'Thrombosthenin একটি প্রোটিন যা থ্রম্বাসকে শক্ত করে।',
+  example: 'Thrombosthenin platelet-কে সক্রিয় করতে সাহায্য করে।'
+},
+"serotonin": {
+  root: 'Sero (সিরাম) + tonin (টোনিক প্রোটিন)',
+  meaning: 'Serotonin হলো একধরনের নিউরোট্রান্সমিটার যা শক্তিশালী প্রভাব ফেলে।',
+  example: 'Serotonin মুড, ঘুম ও রক্তনালী সংকোচনে সাহায্য করে।'
+},
   // ... আরও ৩০টা দিতে পারি চাইলে
 
 };
