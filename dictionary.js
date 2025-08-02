@@ -1,5 +1,4 @@
-aaa cons()
-  const dictionary = [
+const dictionary = [
   {
     word: "axon",
     meaning: "একটি স্নায়ুকোষের প্রসারিত অংশ যা বিদ্যুৎ সংকেত পরিবহন করে।",
