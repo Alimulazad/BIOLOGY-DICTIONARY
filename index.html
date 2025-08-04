@@ -1,1 +1,1252 @@
 <!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Biology Dictionary (Bangla)</title>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <style>
+    body {margin: 0; font-family: Arial, sans-serif; background: #000; color: #fff; min-height: 100vh; overflow-x: hidden;}
+    .title-bar {background: #005f73; color: white; text-align: left; padding: 12px; font-size: 20px; font-weight: bold; display: flex; align-items: center; gap: 10px; position: relative; z-index: 10;}
+    .title-bar .icon-home-label {display: flex; align-items: center; gap: 5px; margin-right: 18px;}
+    .header {display: flex; align-items: center; background: #111; gap: 8px; padding: 0 12px 0 8px; min-height: 58px; position: relative; z-index: 9;}
+    .menu-btn {font-size: 28px; color: #fff; cursor: pointer; background: none; border: none; margin-right: 6px; margin-left: 3px;}
+    .search-bar {flex: 1; padding: 10px 12px; background-color: #222; border: none; color: white; border-radius: 6px; font-size: 18px; margin-right: 6px; margin-left: 6px; outline: none; letter-spacing: 0.5px;}
+    .icon-btn {background: none; border: none; color: #e0e0e0; font-size: 26px; cursor: pointer; border-radius: 50%; padding: 5px; margin-right: 3px; margin-left: 3px; transition: color 0.2s, background 0.2s;}
+    .icon-btn:hover {color: #4fc3f7; background: #222;}
+    .sidebar {position: fixed; top: 0; left: -260px; width: 260px; height: 100%; background: #101c28; padding-top: 62px; transition: left 0.3s cubic-bezier(.4,0,.2,1); z-index: 1000; box-shadow: 2px 0 8px rgba(0,0,0,0.2); overflow-y: auto;}
+    .sidebar.active {left: 0;}
+    .sidebar a {padding: 15px 28px; text-decoration: none; display: flex; align-items: center; color: #fff; border-bottom: 1px solid #1c2635; font-size: 18px; gap: 13px; transition: background 0.2s, color 0.2s; cursor: pointer;}
+    .sidebar a:hover, .sidebar a.active {background: #222; color: #4fc3f7;}
+    .sidebar-icon {font-size: 23px;}
+    .overlay, .history-overlay, .contact-overlay, .addword-overlay, .quizmode-overlay, .bookmark-overlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      background: rgba(0,0,0,0.4);
+      display: none;
+      z-index: 999;
+    }
+    .overlay.active, .history-overlay.active, .contact-overlay.active, .addword-overlay.active, .quizmode-overlay.active, .bookmark-overlay.active {display: block;}
+    .main {padding: 18px 6px 50px 6px; margin-top: 5px; max-width: 650px; margin-left: auto; margin-right: auto;}
+    .definition {background: #222; padding: 15px; border-radius: 8px; margin-top: 20px;}
+    .definition h2 {margin-top: 0; color: #4fc3f7;}
+    .definition .breakdown {margin: 8px 0; color: #ffd166;}
+    .definition .meaning {margin: 6px 0; color: #fff;}
+    .definition .example {color: #aaa; font-style: italic; margin-top: 10px;}
+    .definition .edited-info {color: #38c172; font-size: 14px; margin-top: 10px;}
+    .not-found {color: red; margin-top: 22px; font-size: 18px;}
+    .suggestions {margin-top: 10px; background: #1a1a1a; border-radius: 5px; padding: 10px;}
+    .suggestion-item {padding: 8px 12px; cursor: pointer; border-bottom: 1px solid #333; font-size: 17px; color: #fff; display: flex; align-items: center;}
+    .suggestion-item:hover {background: #333; color: #4fc3f7;}
+    #quizPanel {background: #1a1a1a; padding: 18px; border-radius: 10px; margin-top: 18px; position: relative;}
+    #quizPanel h2 {color: #4fc3f7;}
+    #nextQuizBtn {margin-top: 16px; background: #005f73; color: #fff; border: none; padding: 9px 16px; border-radius: 7px; cursor: pointer; font-size: 16px;}
+    .quiz-opt-btn {margin: 7px 0; padding: 7px 11px; border-radius: 5px; background: #222; color: #fff; border: 1px solid #444; cursor: pointer; font-size: 16px; width: 100%; text-align: left; transition: background 0.2s, color 0.2s;}
+    .quiz-opt-btn:hover:enabled {background: #333; color: #4fc3f7;}
+    .close-btn {position: absolute; top: 10px; right: 16px; background: #333; color: #fff; border: none; border-radius: 50%; width: 32px; height: 32px; cursor: pointer; font-size: 20px;}
+    .close-btn:hover {background: #c62828;}
+    #addWordPopup {
+      position: fixed;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      background: #222;
+      color: #fff;
+      border-radius: 13px;
+      box-shadow: 0 8px 40px #0006;
+      width: 95vw;
+      max-width: 350px;
+      z-index: 2200;
+      padding: 0;
+      display: none;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    #addWordPopup.active {display: flex;}
+    #addWordPopupHeader {
+      padding: 14px 18px 10px 24px;
+      background: #005f73;
+      font-size: 19px;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-top-left-radius: 12px;
+      border-top-right-radius: 12px;
+    }
+    #addWordPopupBody {
+      flex: 1;
+      padding: 18px 19px 18px 19px;
+      background: #222;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      align-items: stretch;
+    }
+    #addWordForm label {font-size:16px; margin-bottom:4px;}
+    #addWordForm input, #addWordForm textarea {
+      width: 100%; border-radius: 6px; border: 1px solid #444; background: #101c28; color: #fff; padding: 7px; font-size: 15px; margin-bottom: 7px;
+    }
+    #addWordForm textarea {resize: vertical;}
+    #addWordFormBtns {
+      display: flex; gap: 9px; margin-top: 6px; justify-content: flex-end;
+    }
+    #addWordFormBtns button {
+      padding: 8px 18px;
+      border-radius: 6px;
+      border: none;
+      font-size: 15px;
+      cursor: pointer;
+      background: #005f73;
+      color: #fff;
+      transition: background 0.2s;
+    }
+    #addWordFormBtns button.cancel {background: #333;}
+    #addWordFormBtns button.cancel:hover {background:#c62828;}
+    #addWordFormBtns button.submit:hover {background:#207490;}
+    .success-msg {color: #38c172; margin-bottom:8px;}
+    .error-msg {color: #c62828; margin-bottom:8px;}
+    #quizModePopup {
+      position: fixed;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      background: #222;
+      color: #fff;
+      border-radius: 13px;
+      box-shadow: 0 8px 40px #0006;
+      width: 95vw;
+      max-width: 350px;
+      z-index: 2000;
+      padding: 0;
+      display: none;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    #quizModePopup.active {display: flex;}
+    #quizModePopupHeader {
+      padding: 14px 18px 10px 24px;
+      background: #005f73;
+      font-size: 19px;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-top-left-radius: 12px;
+      border-top-right-radius: 12px;
+    }
+    #quizModePopupBody {
+      flex: 1;
+      padding: 18px 19px 18px 19px;
+      background: #222;
+      display: flex;
+      flex-direction: column;
+      gap: 17px;
+      align-items: center;
+    }
+    .quiz-mode-radio label {font-size:16px; margin-left:6px; cursor:pointer;}
+    .quiz-mode-radio {margin-bottom:7px;}
+    #quizModePopupBtn {
+      background: #005f73;
+      color: #fff;
+      border: none;
+      padding: 8px 22px;
+      border-radius: 7px;
+      cursor: pointer;
+      font-size: 17px;
+    }
+    #quizModePopupBtn:hover {background:#207490;}
+    #historyPanelPopup {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: #222;
+      color: #fff;
+      border-radius: 13px;
+      box-shadow: 0 8px 40px #0006;
+      width: 95vw;
+      max-width: 480px;
+      max-height: 80vh;
+      z-index: 1500;
+      padding: 0;
+      display: none;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    #historyPanelPopup.active {display: flex;}
+    #historyPanelHeader {
+      padding: 14px 18px 10px 24px;
+      background: #005f73;
+      font-size: 21px;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-top-left-radius: 12px;
+      border-top-right-radius: 12px;
+    }
+    #historyPanelBody {
+      flex: 1;
+      padding: 10px 19px 16px 19px;
+      overflow-y: auto;
+      background: #222;
+    }
+    .history-word {
+      padding: 7px 0;
+      cursor: pointer;
+      border-bottom: 1px solid #333;
+      font-size: 17px;
+      color: #fff;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .history-word:hover {color: #4fc3f7;}
+    .history-options {
+      margin: 8px 0 10px 0;
+      display: flex;
+      gap: 6px;
+      font-size: 14px;
+      align-items: center;
+    }
+    .history-options label {cursor: pointer;}
+    #contactPopup {
+      position: fixed;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      background: #222;
+      color: #fff;
+      border-radius: 13px;
+      box-shadow: 0 8px 40px #0006;
+      width: 95vw;
+      max-width: 340px;
+      z-index: 2100;
+      padding: 0;
+      display: none;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    #contactPopup.active {display: flex;}
+    #contactPopupHeader {
+      padding: 14px 18px 10px 24px;
+      background: #005f73;
+      font-size: 19px;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-top-left-radius: 12px;
+      border-top-right-radius: 12px;
+    }
+    #contactPopupBody {
+      flex: 1;
+      padding: 18px 19px 18px 19px;
+      background: #222;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      align-items: flex-start;
+      font-size: 16px;
+    }
+    .contact-item b {color:#4fc3f7;}
+    .contact-item a {color: #4fc3f7; text-decoration: none;}
+    .contact-item a:hover {text-decoration: underline;}
+    .popup-close-btn {
+      background: #333;
+      color: #fff;
+      border: none;
+      border-radius: 50%;
+      width: 32px;
+      height: 32px;
+      cursor: pointer;
+      font-size: 20px;
+      margin-left: 7px;
+    }
+    .popup-close-btn:hover {background: #c62828;}
+    #bookmarkPanelPopup {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: #222;
+      color: #fff;
+      border-radius: 13px;
+      box-shadow: 0 8px 40px #0006;
+      width: 95vw;
+      max-width: 480px;
+      max-height: 80vh;
+      z-index: 1500;
+      padding: 0;
+      display: none;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    #bookmarkPanelPopup.active {display: flex;}
+    #bookmarkPanelHeader {
+      padding: 14px 18px 10px 24px;
+      background: #005f73;
+      font-size: 21px;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-top-left-radius: 12px;
+      border-top-right-radius: 12px;
+    }
+    #bookmarkPanelBody {
+      flex: 1;
+      padding: 10px 19px 16px 19px;
+      overflow-y: auto;
+      background: #222;
+    }
+    .bookmark-word {
+      padding: 7px 0;
+      cursor: pointer;
+      border-bottom: 1px solid #333;
+      font-size: 17px;
+      color: #fff;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .bookmark-word:hover {color: #4fc3f7;}
+    .font-size-select {width: 100px; padding: 5px; border-radius: 5px; background: #101c28; color: #fff; border: 1px solid #444; font-size: 16px; margin-left: 28px;}
+    .quiz-review-container {background: #222; padding: 15px; border-radius: 8px; margin-top: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.3);}
+    .quiz-review-score {font-size: 24px; color: #4fc3f7; text-align: center; margin-bottom: 15px;}
+    .quiz-review-score span {font-size: 28px; font-weight: bold;}
+    .quiz-review-progress {width: 100%; height: 10px; background: #333; border-radius: 5px; margin-bottom: 20px;}
+    .quiz-review-progress-bar {height: 100%; background: linear-gradient(90deg, #38c172, #4fc3f7); border-radius: 5px; transition: width 0.5s;}
+    .quiz-review-item {background: #1a1a1a; padding: 10px; border-radius: 6px; margin-bottom: 10px; border-left: 4px solid;}
+    .quiz-review-item.correct {border-left-color: #38c172;}
+    .quiz-review-item.incorrect {border-left-color: #c62828;}
+    .quiz-review-item h3 {margin: 0; font-size: 18px; color: #fff;}
+    .quiz-review-item p {margin: 5px 0; color: #aaa;}
+    .quiz-review-btn {background: #005f73; color: #fff; border: none; padding: 10px 20px; border-radius: 7px; cursor: pointer; font-size: 16px; margin-top: 15px; display: block; margin-left: auto; margin-right: auto;}
+    .quiz-review-btn:hover {background: #207490;}
+    .quiz-feedback-animate {
+      animation: shake 0.3s ease-in-out;
+    }
+    .word-count {text-align: center; padding: 5px; background: #0a1929; color: #aaa; font-size: 14px; border-bottom: 1px solid #1a2a3a;}
+    .history-actions {display: flex; justify-content: flex-end; padding: 10px 15px 5px 0;}
+    .clear-history-btn {background: #c62828; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 14px;}
+    .clear-history-btn:hover {background: #b71c1c;}
+    .settings-container {background: #222; padding: 15px; border-radius: 8px; margin-top: 15px;}
+    .setting-item {margin-bottom: 15px; display: flex; align-items: center; gap: 10px;}
+    .setting-label {flex: 1; font-size: 16px;}
+    .setting-control {flex: 2;}
+    .setting-control select, .setting-control input {width: 100%; padding: 8px; background: #101c28; color: #fff; border: 1px solid #444; border-radius: 5px;}
+    .setting-control button {background: #c62828; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; width: 100%;}
+    .setting-control button:hover {background: #b71c1c;}
+    @keyframes shake {
+      0% { transform: translateX(0); }
+      25% { transform: translateX(-5px); }
+      50% { transform: translateX(5px); }
+      75% { transform: translateX(-5px); }
+      100% { transform: translateX(0); }
+    }
+    @media (max-width:600px) {
+      .main, .definition {padding: 7px;}
+      .sidebar {width: 96vw; padding-top: 55px;}
+      .title-bar {font-size: 19px;}
+      #addWordPopup, #quizModePopup, #historyPanelPopup, #contactPopup, #bookmarkPanelPopup {max-width: 98vw;}
+      .font-size-select {width: 80px;}
+    }
+  </style>
+</head>
+<body>
+  <div class="title-bar">
+    <span class="icon-home-label">
+      <span class="material-icons" style="font-size:28px;">home</span>
+      <span>Home</span>
+    </span>
+    <span class="icon">🔬</span>
+    <span>Biology Dictionary (Bangla)</span>
+  </div>
+  <div class="word-count">
+    Total Words: <span id="wordCount">0</span>
+  </div>
+  <div class="header">
+    <button class="menu-btn material-icons" id="menuBtn" type="button">menu</button>
+    <span class="lang-toggle">E&gt;B</span>
+    <input type="text" id="searchInput" class="search-bar" placeholder="'EN'/'BN' text here." onkeyup="showSuggestions()">
+    <button class="icon-btn material-icons" onclick="searchWord()">search</button>
+    <button class="icon-btn material-icons" id="quizIconBtn" title="Quiz" onclick="showQuizModePopup()">quiz</button>
+    <button class="icon-btn material-icons" onclick="showHistoryPopup()" title="History">history</button>
+  </div>
+  <div class="sidebar" id="sidebar">
+    <a href="#" onclick="showMain(); return false;" id="sideHome"><span class="sidebar-icon material-icons">home</span>Home</a>
+    <a href="#" onclick="showBookmarks(); return false;" id="sideBookmark"><span class="sidebar-icon material-icons">bookmark</span>Bookmark</a>
+    <a href="#" onclick="showHistoryPopup(); return false;" id="sideHistory"><span class="sidebar-icon material-icons">history</span>History</a>
+    <a href="#" onclick="showQuizModePopup(); return false;" id="sideQuiz"><span class="sidebar-icon material-icons">quiz</span>Quiz</a>
+    <a href="#" onclick="showAddWordPopup(); return false;" id="sideAddWord"><span class="sidebar-icon material-icons">add_circle</span>Add or Edit Words</a>
+    <a href="#" onclick="showContactPopup(); return false;" id="sideContact"><span class="sidebar-icon material-icons">contact_mail</span>Contact</a>
+    <a href="#" onclick="showSettings(); return false;" id="sideSettings"><span class="sidebar-icon material-icons">settings</span>Settings</a>
+    <a href="#" onclick="return false;" id="sideFontSize"><span class="sidebar-icon material-icons">format_size</span>
+      <select class="font-size-select" onchange="changeFontSize(this.value)">
+        <option value="small">Small</option>
+        <option value="medium" selected>Medium</option>
+        <option value="large">Large</option>
+      </select>
+    </a>
+    <a href="#"><span class="sidebar-icon material-icons">palette</span>App Themes</a>
+    <a href="#"><span class="sidebar-icon material-icons">backup</span>Backup in the File System</a>
+    <a href="#"><span class="sidebar-icon material-icons">cloud_upload</span>Backup in Google Drive</a>
+    <a href="#"><span class="sidebar-icon material-icons">restore</span>Restore from the File System</a>
+    <a href="#"><span class="sidebar-icon material-icons">cloud_download</span>Restore from Google Drive</a>
+    <a href="#"><span class="sidebar-icon material-icons">email</span>Email me your comments</a>
+    <a href="#"><span class="sidebar-icon material-icons">copyright</span>Copyright</a>
+    <a href="#"><span class="sidebar-icon material-icons">warning</span>Disclaimer</a>
+    <a href="#"><span class="sidebar-icon material-icons">person</span>About</a>
+  </div>
+  <div class="overlay" id="overlay"></div>
+  <div class="addword-overlay" id="addWordOverlay"></div>
+  <div class="quizmode-overlay" id="quizModeOverlay"></div>
+  <div class="history-overlay" id="historyOverlay"></div>
+  <div class="contact-overlay" id="contactOverlay"></div>
+  <div class="bookmark-overlay" id="bookmarkOverlay"></div>
+  <div id="addWordPopup">
+    <div id="addWordPopupHeader">
+      <span id="addWordPopupTitle">Add new word</span>
+      <button class="popup-close-btn" id="closeAddWordPopupBtn" title="Close">&times;</button>
+    </div>
+    <div id="addWordPopupBody">
+      <form id="addWordForm">
+        <div class="success-msg" id="addWordSuccessMsg" style="display:none;"></div>
+        <div class="error-msg" id="addWordErrorMsg" style="display:none;"></div>
+        <label for="addWord">Word</label>
+        <input type="text" id="addWord" name="word" required>
+        <label for="addMeaning">Meaning</label>
+        <textarea id="addMeaning" name="meaning" rows="2" required></textarea>
+        <label for="addBreakdown">Breakdown</label>
+        <input type="text" id="addBreakdown" name="breakdown">
+        <label for="addExample">Example</label>
+        <textarea id="addExample" name="example" rows="2"></textarea>
+        <label for="addPronunciation">Pronunciation URL</label>
+        <input type="text" id="addPronunciation" name="pronunciation">
+        <input type="hidden" id="addWordObjectId" name="objectId">
+        <div id="addWordFormBtns">
+          <button type="button" class="cancel" id="addWordCancelBtn">Cancel</button>
+          <button type="submit" class="submit">Submit</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  <div id="quizModePopup">
+    <div id="quizModePopupHeader">
+      কুইজ শুরু করুন
+      <button class="popup-close-btn" id="closeQuizModePopupBtn" title="Close">&times;</button>
+    </div>
+    <div id="quizModePopupBody">
+      <div class="quiz-mode-radio">
+        <input type="radio" id="quizAnyWord" name="quizModeChoose" value="random" checked>
+        <label for="quizAnyWord">যেকোনো শব্দ থেকে কুইজ</label>
+      </div>
+      <div class="quiz-mode-radio">
+        <input type="radio" id="quizHistoryWord" name="quizModeChoose" value="history">
+        <label for="quizHistoryWord">শুধু হিস্টোরি থেকে কুইজ</label>
+      </div>
+      <label>Questions: <input type="number" id="quizNumQuestions" min="1" max="20" value="5" style="width:60px; margin-left:10px;"></label>
+      <label style="margin-left:10px;">Type: 
+        <select id="quizTypeSelect">
+          <option value="meaning">Meaning</option>
+          <option value="breakdown">Breakdown</option>
+          <option value="example">Example</option>
+        </select>
+      </label>
+      <button id="quizModePopupBtn">Quiz শুরু করুন</button>
+    </div>
+  </div>
+  <div id="historyPanelPopup">
+    <div id="historyPanelHeader">
+      হিস্টোরি
+      <button class="popup-close-btn" id="closeHistoryPopupBtn" title="Close">&times;</button>
+    </div>
+    <div class="history-options">
+      <label><input type="radio" name="quizMode" value="history" checked> হিস্টোরি থেকে কুইজ</label>
+      <label><input type="radio" name="quizMode" value="random"> যেকোনো শব্দ থেকে কুইজ</label>
+      <button class="icon-btn material-icons" id="startHistoryQuizBtn" title="কুইজ শুরু করুন" style="font-size:20px;vertical-align:middle;">play_arrow</button>
+    </div>
+    <div class="history-actions">
+      <button class="clear-history-btn" onclick="clearHistory()">Clear History</button>
+    </div>
+    <div id="historyPanelBody"></div>
+  </div>
+  <div id="contactPopup">
+    <div id="contactPopupHeader">
+      যোগাযোগ করুন
+      <button class="popup-close-btn" id="closeContactPopupBtn" title="Close">&times;</button>
+    </div>
+    <div id="contactPopupBody">
+      <div class="contact-item"><b>Email:</b> alimulazad2@gmail.com</div>
+      <div class="contact-item"><b>Telegram:</b> <a href="https://t.me/Alimulazad" target="_blank">t.me/Alimulazad</a></div>
+      <div class="contact-item"><b>WhatsApp:</b> <a href="https://wa.me/8801863198499" target="_blank">+8801863198499</a></div>
+    </div>
+  </div>
+  <div id="bookmarkPanelPopup">
+    <div id="bookmarkPanelHeader">
+      বুকমার্ক
+      <button class="popup-close-btn" id="closeBookmarkPopupBtn" title="Close">&times;</button>
+    </div>
+    <div id="bookmarkPanelBody"></div>
+  </div>
+  <div class="main" id="mainContent">
+    <div id="suggestionBox" class="suggestions"></div>
+    <div id="resultArea"></div>
+    <div id="quizPanel" style="display:none;">
+      <button class="close-btn" id="closeQuizBtn" title="Close">&times;</button>
+      <h2>Quiz Panel</h2>
+      <div id="quizQuestion"></div>
+      <div id="quizOptions"></div>
+      <div id="quizFeedback" style="margin-top:10px; font-size:17px;"></div>
+      <button id="nextQuizBtn" style="display:none;">Next</button>
+    </div>
+  </div>
+  <script src="dictionary.js"></script>
+  <script>
+    // ----- Service Worker Registration for Offline Support -----
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').catch(error => {
+        console.error('Service Worker registration failed:', error);
+      });
+    }
+
+    // ----- Sidebar & Overlay -----
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('overlay');
+    const menuBtn = document.getElementById('menuBtn');
+    menuBtn.onclick = function() {
+      sidebar.classList.add('active');
+      overlay.classList.add('active');
+    };
+    overlay.onclick = function() {
+      sidebar.classList.remove('active');
+      overlay.classList.remove('active');
+    };
+    document.querySelectorAll('#sidebar a').forEach(function(a){
+      a.addEventListener('click', function(){
+        sidebar.classList.remove('active');
+        overlay.classList.remove('active');
+      });
+    });
+
+    // ----- Dictionary Data -----
+    let localWords = JSON.parse(localStorage.getItem('localWords') || "[]");
+    let bookmarks = JSON.parse(localStorage.getItem('bookmarks') || "[]");
+    let history = JSON.parse(localStorage.getItem('history') || "[]");
+    let serverWords = [];
+
+    function getCombinedDictionary() {
+      let dictArr = [];
+      if (window.dictionary && Array.isArray(window.dictionary)) {
+        dictArr = window.dictionary;
+      } else {
+        console.warn("window.dictionary is not defined or not an array. Using empty array.");
+        document.getElementById("resultArea").innerHTML = `<p class="error-msg">Error: Dictionary data not loaded. Please check dictionary.js.</p>`;
+      }
+      return [...dictArr, ...localWords, ...serverWords];
+    }
+
+    function setSidebarActive(id) {
+      ["sideHome", "sideBookmark", "sideHistory", "sideQuiz", "sideAddWord", "sideContact", "sideSettings", "sideFontSize"].forEach(i => {
+        let el = document.getElementById(i);
+        if (el) el.classList.remove("active");
+      });
+      if (id) {
+        let el = document.getElementById(id);
+        if (el) el.classList.add("active");
+      }
+    }
+
+    function closeAllPanels() {
+      document.getElementById("resultArea").style.display = "none";
+      document.getElementById("suggestionBox").style.display = "none";
+      document.getElementById("quizPanel").style.display = "none";
+      document.getElementById("bookmarkPanelPopup").classList.remove("active");
+      document.getElementById("bookmarkOverlay").classList.remove("active");
+      document.getElementById("historyPanelPopup").classList.remove("active");
+      document.getElementById("historyOverlay").classList.remove("active");
+      document.getElementById("contactPopup").classList.remove("active");
+      document.getElementById("contactOverlay").classList.remove("active");
+      document.getElementById("addWordPopup").classList.remove("active");
+      document.getElementById("addWordOverlay").classList.remove("active");
+      document.getElementById("quizModePopup").classList.remove("active");
+      document.getElementById("quizModeOverlay").classList.remove("active");
+      document.body.style.overflow = "";
+    }
+
+    function showMain() {
+      setSidebarActive("sideHome");
+      closeAllPanels();
+      document.getElementById("resultArea").style.display = "block";
+      document.getElementById("suggestionBox").style.display = "block";
+    }
+
+    function showBookmarks() {
+      setSidebarActive("sideBookmark");
+      closeAllPanels();
+      renderBookmarkPanel();
+      document.getElementById("bookmarkPanelPopup").classList.add("active");
+      document.getElementById("bookmarkOverlay").classList.add("active");
+      document.body.style.overflow = "hidden";
+    }
+
+    function showSettings() {
+      setSidebarActive("sideSettings");
+      closeAllPanels();
+      document.getElementById("resultArea").innerHTML = `
+        <div class="settings-container">
+          <h2>Settings</h2>
+          <div class="setting-item">
+            <div class="setting-label">Font Size:</div>
+            <div class="setting-control">
+              <select onchange="changeFontSize(this.value)">
+                <option value="small" ${localStorage.getItem('fontSize') === 'small' ? 'selected' : ''}>Small</option>
+                <option value="medium" ${!localStorage.getItem('fontSize') || localStorage.getItem('fontSize') === 'medium' ? 'selected' : ''}>Medium</option>
+                <option value="large" ${localStorage.getItem('fontSize') === 'large' ? 'selected' : ''}>Large</option>
+              </select>
+            </div>
+          </div>
+          <div class="setting-item">
+            <div class="setting-label">Clear Data:</div>
+            <div class="setting-control">
+              <button onclick="if(confirm('Are you sure? This will clear all local data!')) {
+                localStorage.clear(); 
+                location.reload();
+              }">Clear All Data</button>
+            </div>
+          </div>
+        </div>
+      `;
+      document.getElementById("resultArea").style.display = "block";
+    }
+
+    // --- Search & Suggestion ---
+    function searchWord() {
+      closeAllPanels();
+      setSidebarActive("sideHome");
+      document.getElementById("resultArea").style.display = "block";
+      document.getElementById("suggestionBox").style.display = "block";
+      const input = document.getElementById("searchInput").value.trim().toLowerCase();
+      document.getElementById("resultArea").innerHTML = "";
+      document.getElementById("suggestionBox").innerHTML = "";
+      let allDict = getCombinedDictionary();
+      let result = serverWords.find(entry => entry.word && entry.word.toLowerCase() === input) ||
+                   localWords.find(entry => entry.word && entry.word.toLowerCase() === input) ||
+                   allDict.find(entry => entry.word && entry.word.toLowerCase() === input);
+      if (result) {
+        displayResult(result);
+        addToHistory(result);
+      } else {
+        document.getElementById("resultArea").innerHTML = `<p class="not-found">❌ Sorry, word not found.</p>`;
+      }
+    }
+
+    function showSuggestions() {
+      const input = document.getElementById("searchInput").value.trim().toLowerCase();
+      document.getElementById("suggestionBox").innerHTML = "";
+      if (input.length === 0) return;
+      
+      let suggestions = [];
+      
+      // 1. Priority: Exact history matches
+      const historyMatches = history.filter(h => 
+        h.word && h.word.toLowerCase().includes(input)
+      ).map(h => h.word);
+      
+      // 2. Priority: Dictionary matches
+      const allDict = getCombinedDictionary();
+      const dictMatches = allDict.filter(entry => 
+        entry.word && entry.word.toLowerCase().includes(input)
+      ).map(entry => entry.word);
+      
+      // Combine and deduplicate
+      suggestions = [...new Set([...historyMatches, ...dictMatches])].slice(0, 7);
+      
+      suggestions.forEach(word => {
+        const item = document.createElement("div");
+        item.className = "suggestion-item";
+        item.innerHTML = `
+          <span class="material-icons" style="font-size:18px;margin-right:8px;">
+            ${historyMatches.includes(word) ? 'history' : 'search'}
+          </span>
+          ${word}
+        `;
+        item.onclick = () => {
+          document.getElementById("searchInput").value = word;
+          document.getElementById("suggestionBox").innerHTML = "";
+          searchWord();
+        };
+        document.getElementById("suggestionBox").appendChild(item);
+      });
+    }
+
+    function displayResult(result) {
+      if (!result || !result.word) {
+        document.getElementById("resultArea").innerHTML = `<p class="error-msg">Error: Invalid word data.</p>`;
+        return;
+      }
+      const isBookmarked = bookmarks.some(b => b.word === result.word);
+      const isServerWord = serverWords.some(w => w.word === result.word);
+      const isValidUrl = (url) => {
+        try {
+          new URL(url);
+          return true;
+        } catch {
+          return false;
+        }
+      };
+      const audioBtn = result.pronunciation && isValidUrl(result.pronunciation) ? 
+        `<button class="icon-btn material-icons" onclick="playPronunciation('${result.pronunciation}', '${result.word.replace(/'/g, "\\'")}')" title="Pronunciation">volume_up</button>` : 
+        `<button class="icon-btn material-icons" onclick="playPronunciation('', '${result.word.replace(/'/g, "\\'")}')" title="Pronunciation">volume_up</button>`;
+        
+      document.getElementById("resultArea").innerHTML = `
+        <div class="definition">
+          <h2>${result.word || "Unknown"} 
+            ${audioBtn}
+            <button class="icon-btn material-icons" onclick="toggleBookmark('${result.word}')" title="${isBookmarked ? 'Remove Bookmark' : 'Add Bookmark'}">
+              ${isBookmarked ? 'bookmark' : 'bookmark_border'}
+            </button>
+            <button class="icon-btn material-icons" onclick="editWord('${result.word}')" title="Edit Word">edit</button>
+          </h2>
+          <div class="breakdown"><b>গঠন:</b> ${result.breakdown || "—"}</div>
+          <div class="meaning"><b>অর্থ:</b> ${result.meaning || "—"}</div>
+          <div class="example"><b>উদাহরণ:</b> ${result.example || "—"}</div>
+          ${isServerWord && result.updatedAt ? `<div class="edited-info">Edited on ${new Date(result.updatedAt).toLocaleString()}</div>` : ''}
+        </div>
+      `;
+      applyFontSize();
+    }
+
+    function playPronunciation(audioUrl, word) {
+      if (audioUrl && audioUrl.startsWith('http')) {
+        const audio = new Audio(audioUrl);
+        audio.play().catch(e => {
+          console.error("Audio playback failed:", e);
+          useTextToSpeech(word);
+        });
+      } else {
+        useTextToSpeech(word);
+      }
+    }
+
+    function useTextToSpeech(word) {
+      if ('speechSynthesis' in window) {
+        const utterance = new SpeechSynthesisUtterance(word);
+        const isBangla = /[\u0980-\u09FF]/.test(word);
+        utterance.lang = isBangla ? 'bn-BD' : 'en-US';
+        utterance.volume = 1;
+        utterance.rate = 1;
+        utterance.pitch = 1;
+        speechSynthesis.speak(utterance);
+      } else {
+        document.getElementById("resultArea").innerHTML += `<p class="error-msg">Text-to-Speech is not supported in this browser.</p>`;
+      }
+    }
+
+    function toggleBookmark(word) {
+      const index = bookmarks.findIndex(b => b.word === word);
+      if (index === -1) {
+        const wordObj = getCombinedDictionary().find(w => w.word === word);
+        if (wordObj) bookmarks.push(wordObj);
+      } else {
+        bookmarks.splice(index, 1);
+      }
+      localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
+      searchWord();
+    }
+
+    function addToHistory(wordObj) {
+      if (!history.find(item => item.word === wordObj.word)) {
+        history.unshift({ word: wordObj.word, time: new Date().toLocaleString() });
+        if (history.length > 50) history.pop();
+        localStorage.setItem('history', JSON.stringify(history));
+      }
+    }
+
+    // ---- Bookmark Popup ----
+    const bookmarkPanelPopup = document.getElementById("bookmarkPanelPopup");
+    const bookmarkOverlay = document.getElementById("bookmarkOverlay");
+    function renderBookmarkPanel() {
+      const body = document.getElementById("bookmarkPanelBody");
+      if (!bookmarks.length) {
+        body.innerHTML = "<i>কোন বুকমার্ক নেই</i>";
+        return;
+      }
+      body.innerHTML = bookmarks.map(b =>
+        `<div class="bookmark-word" onclick="showBookmarkWordDetail('${b.word}')">
+          <span>${b.word}</span>
+        </div>`
+      ).join("");
+      applyFontSize();
+    }
+
+    window.showBookmarkWordDetail = function(word) {
+      const found = bookmarks.find(w => w.word === word);
+      if (found) {
+        const body = document.getElementById("bookmarkPanelBody");
+        body.innerHTML = `
+          <button class="popup-close-btn" onclick="renderBookmarkPanel()" style="float:right; margin-top:5px; margin-bottom:7px;">&#8592;</button>
+          <div class="definition">
+            <h2>${found.word}</h2>
+            <div class="breakdown"><b>গঠন:</b> ${found.breakdown ? found.breakdown : "—"}</div>
+            <div class="meaning"><b>অর্থ:</b> ${found.meaning ? found.meaning : "—"}</div>
+            <div class="example"><b>উদাহরণ:</b> ${found.example ? found.example : "—"}</div>
+          </div>
+        `;
+        applyFontSize();
+      }
+    }
+
+    function closeBookmarkPopup() {
+      bookmarkPanelPopup.classList.remove("active");
+      bookmarkOverlay.classList.remove("active");
+      document.body.style.overflow = "";
+    }
+    document.getElementById("closeBookmarkPopupBtn").onclick = closeBookmarkPopup;
+    bookmarkOverlay.onclick = closeBookmarkPopup;
+
+    // ---- Font Size Control ----
+    function changeFontSize(size) {
+      localStorage.setItem('fontSize', size);
+      applyFontSize();
+    }
+
+    function applyFontSize() {
+      const size = localStorage.getItem('fontSize') || 'medium';
+      let fontSize;
+      switch (size) {
+        case 'small': fontSize = '14px'; break;
+        case 'medium': fontSize = '18px'; break;
+        case 'large': fontSize = '22px'; break;
+        default: fontSize = '18px';
+      }
+      document.querySelectorAll('.definition h2').forEach(el => el.style.fontSize = fontSize);
+      document.querySelectorAll('.definition .breakdown, .definition .meaning, .definition .example').forEach(el => el.style.fontSize = `calc(${fontSize} - 2px)`);
+      document.querySelectorAll('.bookmark-word, .history-word').forEach(el => el.style.fontSize = fontSize);
+    }
+
+    // ---- History Popup ----
+    const historyPanelPopup = document.getElementById("historyPanelPopup");
+    const historyOverlay = document.getElementById("historyOverlay");
+    function showHistoryPopup() {
+      setSidebarActive("sideHistory");
+      renderHistoryPanel();
+      historyPanelPopup.classList.add("active");
+      historyOverlay.classList.add("active");
+      document.body.style.overflow = "hidden";
+    }
+    function closeHistoryPopup() {
+      historyPanelPopup.classList.remove("active");
+      historyOverlay.classList.remove("active");
+      document.body.style.overflow = "";
+    }
+    document.getElementById("closeHistoryPopupBtn").onclick = closeHistoryPopup;
+    historyOverlay.onclick = closeHistoryPopup;
+
+    function renderHistoryPanel() {
+      const body = document.getElementById("historyPanelBody");
+      if (!history.length) {
+        body.innerHTML = "<i>কোন হিস্টোরি নেই</i>";
+        return;
+      }
+      body.innerHTML = history.map(h => {
+        const isBookmarked = bookmarks.some(b => b.word === h.word);
+        return `<div class="history-word">
+          <span onclick="showHistoryWordDetail('${h.word}')">${h.word}</span>
+          <div style="display:flex;align-items:center;">
+            <span style="font-size:12px; color:#aaa;margin-right:8px;">${h.time ? h.time : ""}</span>
+            <span class="material-icons" onclick="event.stopPropagation();toggleBookmark('${h.word}')" 
+                  style="font-size:20px;color:${isBookmarked ? '#4fc3f7' : '#aaa'}">
+              ${isBookmarked ? 'bookmark' : 'bookmark_border'}
+            </span>
+          </div>
+        </div>`;
+      }).join("");
+      applyFontSize();
+    }
+
+    function clearHistory() {
+      if (confirm("Are you sure you want to clear all history?")) {
+        history = [];
+        localStorage.setItem('history', JSON.stringify(history));
+        renderHistoryPanel();
+      }
+    }
+
+    window.showHistoryWordDetail = function(word) {
+      const found = getCombinedDictionary().find(w => w.word === word);
+      if (found) {
+        const body = document.getElementById("historyPanelBody");
+        body.innerHTML = `
+          <button class="popup-close-btn" onclick="renderHistoryPanel()" style="float:right; margin-top:5px; margin-bottom:7px;">&#8592;</button>
+          <div class="definition">
+            <h2>${found.word}</h2>
+            <div class="breakdown"><b>গঠন:</b> ${found.breakdown ? found.breakdown : "—"}</div>
+            <div class="meaning"><b>অর্থ:</b> ${found.meaning ? found.meaning : "—"}</div>
+            <div class="example"><b>উদাহরণ:</b> ${found.example ? found.example : "—"}</div>
+          </div>
+        `;
+        applyFontSize();
+      }
+    }
+
+    // ---- Quiz Mode Popup ----
+    const quizModePopup = document.getElementById("quizModePopup");
+    const quizModeOverlay = document.getElementById("quizModeOverlay");
+    const quizModePopupBtn = document.getElementById("quizModePopupBtn");
+    function showQuizModePopup() {
+      setSidebarActive("sideQuiz");
+      quizModePopup.classList.add("active");
+      quizModeOverlay.classList.add("active");
+      document.body.style.overflow = "hidden";
+      if (!document.getElementById("quizNumQuestions")) {
+        let numInput = document.createElement("input");
+        numInput.type = "number";
+        numInput.id = "quizNumQuestions";
+        numInput.min = 1;
+        numInput.max = 20;
+        numInput.value = quizNumQuestions;
+        numInput.style = "width:60px; margin-left:10px;";
+        let label = document.createElement("label");
+        label.textContent = "Questions:";
+        label.appendChild(numInput);
+        document.getElementById("quizModePopupBody").appendChild(label);
+
+        let typeSelect = document.createElement("select");
+        typeSelect.id = "quizTypeSelect";
+        ["meaning", "breakdown", "example"].forEach(t => {
+          let opt = document.createElement("option");
+          opt.value = t;
+          opt.textContent = t.charAt(0).toUpperCase() + t.slice(1);
+          typeSelect.appendChild(opt);
+        });
+        let typeLabel = document.createElement("label");
+        typeLabel.textContent = "Type:";
+        typeLabel.appendChild(typeSelect);
+        typeLabel.style = "margin-left:10px;";
+        document.getElementById("quizModePopupBody").appendChild(typeLabel);
+      }
+    }
+    function closeQuizModePopup() {
+      quizModePopup.classList.remove("active");
+      quizModeOverlay.classList.remove("active");
+      document.body.style.overflow = "";
+    }
+    document.getElementById("closeQuizModePopupBtn").onclick = closeQuizModePopup;
+    quizModeOverlay.onclick = closeQuizModePopup;
+
+    // ---- Contact Popup ----
+    const contactPopup = document.getElementById("contactPopup");
+    const contactOverlay = document.getElementById("contactOverlay");
+    function showContactPopup() {
+      setSidebarActive("sideContact");
+      contactPopup.classList.add("active");
+      contactOverlay.classList.add("active");
+      document.body.style.overflow = "hidden";
+    }
+    function closeContactPopup() {
+      contactPopup.classList.remove("active");
+      contactOverlay.classList.remove("active");
+      document.body.style.overflow = "";
+    }
+    document.getElementById("closeContactPopupBtn").onclick = closeContactPopup;
+    contactOverlay.onclick = closeContactPopup;
+
+    // ---- Add/Edit Word Popup ----
+    const addWordPopup = document.getElementById("addWordPopup");
+    const addWordOverlay = document.getElementById("addWordOverlay");
+    const addWordForm = document.getElementById("addWordForm");
+    const addWordSuccessMsg = document.getElementById("addWordSuccessMsg");
+    const addWordErrorMsg = document.getElementById("addWordErrorMsg");
+    function showAddWordPopup() {
+      setSidebarActive("sideAddWord");
+      addWordPopup.classList.add("active");
+      addWordOverlay.classList.add("active");
+      document.body.style.overflow = "hidden";
+      addWordForm.reset();
+      addWordSuccessMsg.style.display = "none";
+      addWordErrorMsg.style.display = "none";
+      document.getElementById("addWordPopupTitle").textContent = "Add new word";
+      document.getElementById("addWordObjectId").value = "";
+    }
+    function closeAddWordPopup() {
+      addWordPopup.classList.remove("active");
+      addWordOverlay.classList.remove("active");
+      document.body.style.overflow = "";
+    }
+    document.getElementById("closeAddWordPopupBtn").onclick = closeAddWordPopup;
+    document.getElementById("addWordCancelBtn").onclick = closeAddWordPopup;
+    addWordOverlay.onclick = closeAddWordPopup;
+
+    window.editWord = function(word) {
+      const wordObj = getCombinedDictionary().find(w => w.word === word);
+      if (wordObj) {
+        setSidebarActive("sideAddWord");
+        addWordPopup.classList.add("active");
+        addWordOverlay.classList.add("active");
+        document.body.style.overflow = "hidden";
+        document.getElementById("addWord").value = wordObj.word;
+        document.getElementById("addMeaning").value = wordObj.meaning || "";
+        document.getElementById("addBreakdown").value = wordObj.breakdown || "";
+        document.getElementById("addExample").value = wordObj.example || "";
+        document.getElementById("addPronunciation").value = wordObj.pronunciation || "";
+        document.getElementById("addWordObjectId").value = wordObj.objectId || "";
+        document.getElementById("addWordPopupTitle").textContent = "Edit word";
+        addWordSuccessMsg.style.display = "none";
+        addWordErrorMsg.style.display = "none";
+      }
+    };
+
+    addWordForm.onsubmit = function(e) {
+      e.preventDefault();
+      addWordSuccessMsg.style.display = "none";
+      addWordErrorMsg.style.display = "none";
+      const word = addWordForm.word.value.trim();
+      const meaning = addWordForm.meaning.value.trim();
+      const breakdown = addWordForm.breakdown.value.trim();
+      const example = addWordForm.example.value.trim();
+      const pronunciation = addWordForm.pronunciation.value.trim();
+      const objectId = addWordForm.objectId.value;
+      if (!word || !meaning) {
+        addWordErrorMsg.textContent = "Word এবং Meaning দিতে হবে!";
+        addWordErrorMsg.style.display = "block";
+        return;
+      }
+      const headers = {
+        "X-Parse-Application-Id": "ajoJF5djJIbi5BgETu5XMYh48GTayCJx2uQi3dzO",
+        "X-Parse-REST-API-Key": "Tfh8T9FEImgQbVJmkeTLFbRYIWcjyyEcrDxq09dS",
+        "Content-Type": "application/json"
+      };
+      const url = objectId 
+        ? `https://parseapi.back4app.com/classes/Words/${objectId}`
+        : "https://parseapi.back4app.com/classes/Words";
+      const method = objectId ? "PUT" : "POST";
+      fetch(url, {
+        method: method,
+        headers: headers,
+        body: JSON.stringify({word, meaning, breakdown, example, pronunciation})
+      })
+      .then(res => {
+        if(res.ok) return res.json();
+        throw new Error("Network Error");
+      })
+      .then(data => {
+        addWordSuccessMsg.textContent = objectId ? "Success! শব্দটি আপডেট হয়েছে।" : "Success! শব্দটি যুক্ত হয়েছে।";
+        addWordSuccessMsg.style.display = "block";
+        addWordForm.reset();
+        loadDictionaryFromServer();
+        closeAddWordPopup();
+      })
+      .catch(err => {
+        addWordErrorMsg.textContent = "Error: শব্দটি আপডেট/যুক্ত করা যায়নি!";
+        addWordErrorMsg.style.display = "block";
+      });
+    };
+
+    // ---- Load serverWords on page load ----
+    function loadDictionaryFromServer() {
+      fetch('https://parseapi.back4app.com/classes/Words', {
+        headers: {
+          'X-Parse-Application-Id': 'ajoJF5djJIbi5BgETu5XMYh48GTayCJx2uQi3dzO',
+          'X-Parse-REST-API-Key': 'Tfh8T9FEImgQbVJmkeTLFbRYIWcjyyEcrDxq09dS',
+        },
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.results) {
+          serverWords = data.results;
+          updateWordCount();
+        }
+      })
+      .catch(error => {});
+    }
+
+    function updateWordCount() {
+      const count = getCombinedDictionary().length;
+      document.getElementById("wordCount").textContent = count;
+    }
+
+    // ---- Quiz Panel ----
+    let quizWords = [];
+    let quizIndex = 0;
+    let quizAnswer = "";
+    let quizMode = "random";
+    let quizScore = 0;
+    let quizTimer = null;
+    let quizTimeLeft = 20;
+    let quizType = "meaning";
+    let quizReview = [];
+    let quizNumQuestions = 5;
+
+    function startQuizFromMode(mode) {
+      closeQuizModePopup();
+      quizNumQuestions = parseInt(document.getElementById("quizNumQuestions").value) || 5;
+      quizType = document.getElementById("quizTypeSelect").value || "meaning";
+      showQuizPanel(mode);
+    }
+
+    function showQuizPanel(wordsSource) {
+      closeAllPanels();
+      setSidebarActive("sideQuiz");
+      document.getElementById("quizPanel").style.display = "block";
+      quizMode = wordsSource || "random";
+      quizScore = 0;
+      quizReview = [];
+      if (quizMode === "history" && history.length) {
+        quizWords = history.map(h => getCombinedDictionary().find(w => w.word === h.word)).filter(Boolean).sort(() => Math.random() - 0.5);
+        if (quizWords.length === 0) quizWords = getCombinedDictionary().sort(() => Math.random() - 0.5).slice(0, quizNumQuestions);
+      } else {
+        quizWords = getCombinedDictionary().sort(() => Math.random() - 0.5).slice(0, quizNumQuestions);
+      }
+      quizIndex = 0;
+      showQuizQuestion();
+    }
+
+    function showQuizQuestion() {
+      if (quizIndex >= quizWords.length) {
+        showQuizReview();
+        return;
+      }
+      let current = quizWords[quizIndex];
+      let questionText = "";
+      let correctAnswer = "";
+      let options = [];
+      if (quizType === "meaning") {
+        questionText = `<b>"${current.word}" শব্দের অর্থ কী?</b>`;
+        correctAnswer = current.meaning;
+        let all = getCombinedDictionary().filter(w => w.word !== current.word);
+        let wrongs = all.sort(() => Math.random() - 0.5).slice(0, 3).map(w => w.meaning);
+        options = [correctAnswer, ...wrongs].sort(() => Math.random() - 0.5);
+      } else if (quizType === "breakdown") {
+        questionText = `<b>"${current.word}" শব্দের গঠন কী?</b>`;
+        correctAnswer = current.breakdown || "—";
+        let all = getCombinedDictionary().filter(w => w.word !== current.word);
+        let wrongs = all.sort(() => Math.random() - 0.5).slice(0, 3).map(w => w.breakdown || "—");
+        options = [correctAnswer, ...wrongs].sort(() => Math.random() - 0.5);
+      } else if (quizType === "example") {
+        questionText = `<b>"${current.word}" শব্দের উদাহরণ কী?</b>`;
+        correctAnswer = current.example || "—";
+        let all = getCombinedDictionary().filter(w => w.word !== current.word);
+        let wrongs = all.sort(() => Math.random() - 0.5).slice(0, 3).map(w => w.example || "—");
+        options = [correctAnswer, ...wrongs].sort(() => Math.random() - 0.5);
+      }
+      quizAnswer = current.meaning;
+      document.getElementById("quizQuestion").innerHTML = questionText + `<br><span id="quizTimer" style="font-size:15px;color:#ffd166;"></span>`;
+      let html = "";
+      options.forEach((opt, i) => {
+        html += `<button class="quiz-opt-btn" onclick="checkQuizAnswer(this, '${opt.replace(/'/g,"\\'")}')">${opt}</button>`;
+      });
+      document.getElementById("quizOptions").innerHTML = html;
+      document.getElementById("quizFeedback").textContent = "";
+      document.getElementById("nextQuizBtn").style.display = "none";
+      startQuizTimer();
+    }
+
+    function startQuizTimer() {
+      quizTimeLeft = 20;
+      updateTimerDisplay();
+      if (quizTimer) clearInterval(quizTimer);
+      quizTimer = setInterval(() => {
+        quizTimeLeft--;
+        updateTimerDisplay();
+        if (quizTimeLeft <= 0) {
+          clearInterval(quizTimer);
+          document.querySelectorAll(".quiz-opt-btn").forEach(b => b.disabled = true);
+          document.getElementById("quizFeedback").textContent = "⏰ সময় শেষ! সঠিক উত্তর: " + quizAnswer;
+          quizReview.push({word: quizWords[quizIndex].word, correct: false, answer: quizAnswer, selected: null});
+          document.getElementById("nextQuizBtn").style.display = "inline-block";
+        }
+      }, 1000);
+    }
+
+    function updateTimerDisplay() {
+      document.getElementById("quizTimer").innerHTML = `
+        <div style="display:flex;align-items:center;gap:5px;">
+          <span class="material-icons" style="font-size:18px;">timer</span>
+          <div style="width:100px;height:8px;background:#333;border-radius:4px;">
+            <div style="height:100%;width:${(quizTimeLeft/20)*100}%;background:#4fc3f7;border-radius:4px;transition:width 1s linear;"></div>
+          </div>
+          <span>${quizTimeLeft}s</span>
+        </div>
+      `;
+    }
+
+    window.checkQuizAnswer = function(btn, selected) {
+      clearInterval(quizTimer);
+      let correct = selected === quizAnswer;
+      if (correct) {
+        quizScore++;
+        btn.style.background = "#005f73";
+        btn.style.color = "#fff";
+        document.getElementById("quizFeedback").textContent = "✅ সঠিক উত্তর!";
+      } else {
+        btn.style.background = "#c62828";
+        btn.style.color = "#fff";
+        document.getElementById("quizFeedback").textContent = "❌ ভুল! সঠিক উত্তর: " + quizAnswer;
+        document.getElementById("quizFeedback").classList.add("quiz-feedback-animate");
+        setTimeout(() => document.getElementById("quizFeedback").classList.remove("quiz-feedback-animate"), 300);
+      }
+      quizReview.push({word: quizWords[quizIndex].word, correct, answer: quizAnswer, selected});
+      document.querySelectorAll(".quiz-opt-btn").forEach(b => b.disabled = true);
+      document.getElementById("nextQuizBtn").style.display = "inline-block";
+    }
+
+    document.getElementById("nextQuizBtn").onclick = function() {
+      quizIndex++;
+      showQuizQuestion();
+    };
+
+    function showQuizReview() {
+      document.getElementById("quizQuestion").innerHTML = `Quiz Finished! 🎉<br><span class="quiz-review-score">Score: <span>${quizScore}/${quizWords.length}</span></span>`;
+      let percentage = (quizScore / quizWords.length) * 100;
+      let html = `<div class="quiz-review-container">
+        <div class="quiz-review-progress"><div class="quiz-review-progress-bar" style="width:${percentage}%"></div></div>
+        <h3 style="color:#4fc3f7;">Review:</h3>`;
+      quizReview.forEach((q, i) => {
+        html += `
+          <div class="quiz-review-item ${q.correct ? 'correct' : 'incorrect'}">
+            <h3>${i+1}. ${q.word} ${q.correct ? '<span class="material-icons" style="font-size:18px;color:#38c172;">check_circle</span>' : '<span class="material-icons" style="font-size:18px;color:#c62828;">cancel</span>'}</h3>
+            <p><b>Correct:</b> ${q.answer}</p>
+            ${q.selected ? `<p><b>Your answer:</b> ${q.selected}</p>` : ''}
+          </div>`;
+      });
+      document.getElementById("quizOptions").innerHTML = html;
+      document.getElementById("nextQuizBtn").style.display = "none";
+      document.getElementById("quizFeedback").textContent = "";
+    }
+
+    document.getElementById("closeQuizBtn").onclick = () => {
+      closeAllPanels();
+      document.getElementById("resultArea").style.display = "block";
+      document.getElementById("suggestionBox").style.display = "block";
+      setSidebarActive("sideHome");
+      if (quizTimer) clearInterval(quizTimer);
+    };
+
+    document.getElementById("startHistoryQuizBtn").onclick = function() {
+      closeHistoryPopup();
+      let mode = document.querySelector('input[name="quizMode"]:checked').value;
+      startQuizFromMode(mode);
+    };
+
+    document.querySelectorAll('input[name="quizMode"]').forEach(function(radio){
+      radio.onchange = function() {
+        quizMode = this.value;
+      };
+    });
+
+    quizModePopupBtn.onclick = function() {
+      let mode = document.querySelector('input[name="quizModeChoose"]:checked').value;
+      startQuizFromMode(mode);
+    };
+
+    // --- Initialize ---
+    window.onload = function() {
+      showMain();
+      applyFontSize();
+      loadDictionaryFromServer();
+      updateWordCount();
+    };
+  </script>
+</body>
+</html>
