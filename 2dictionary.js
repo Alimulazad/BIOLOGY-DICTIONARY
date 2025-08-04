@@ -1,4 +1,4 @@
-window.dictionary = [
+var dictionary = [
   {
     word: "zygote",
     meaning: "জাইগোট",
