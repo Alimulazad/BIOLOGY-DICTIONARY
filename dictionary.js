@@ -1,4 +1,4 @@
-const dictionary = [
+window.dictionary = [
   {
     word: "axon",
     meaning: "একটি স্নায়ুকোষের প্রসারিত অংশ যা বিদ্যুৎ সংকেত পরিবহন করে।",
