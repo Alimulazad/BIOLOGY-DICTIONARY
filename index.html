@@ -640,45 +640,78 @@
         document.getElementById("resultArea").innerHTML = `<p class="not-found">❌ Sorry, word not found.</p>`;
       }
     }
-
+   // START
     function showSuggestions() {
-      const input = document.getElementById("searchInput").value.trim().toLowerCase();
+  const input = document.getElementById("searchInput").value.trim().toLowerCase();
+  document.getElementById("suggestionBox").innerHTML = "";
+  if (input.length === 0) return;
+
+  let suggestions = [];
+
+  // শুধুমাত্র Dictionary থেকে মিল খুঁজবে
+  const allDict = getCombinedDictionary();
+  const dictMatches = allDict.filter(entry => 
+    entry.word && entry.word.toLowerCase().includes(input)
+  ).map(entry => entry.word);
+
+  suggestions = [...new Set(dictMatches)].slice(0, 7);
+
+  suggestions.forEach(word => {
+    const item = document.createElement("div");
+    item.className = "suggestion-item";
+    item.innerHTML = `
+      <span class="material-icons" style="font-size:18px;margin-right:8px;">
+        search
+      </span>
+      ${word}
+    `;
+    item.onclick = () => {
+      document.getElementById("searchInput").value = word;
       document.getElementById("suggestionBox").innerHTML = "";
-      if (input.length === 0) return;
+      searchWord();
+    };
+    document.getElementById("suggestionBox").appendChild(item);
+  });
+}
+
+   // function showSuggestions() {
+// const input = document.getElementById("searchInput").value.trim().toLowerCase();
+  //    document.getElementById("suggestionBox").innerHTML = "";
+    //  if (input.length === 0) return;
       
-      let suggestions = [];
+   //   let suggestions = [];
       
       // 1. Priority: Exact history matches
-    //  const historyMatches = history.filter(h => 
-   //     h.word && h.word.toLowerCase().includes(input)
-    //  ).map(h => h.word);
+   //  const historyMatches = history.filter(h => 
+   //   h.word && h.word.toLowerCase().includes(input)
+     //).map(h => h.word);
       
       // 2. Priority: Dictionary matches
-      const allDict = getCombinedDictionary();
-      const dictMatches = allDict.filter(entry => 
-        entry.word && entry.word.toLowerCase().includes(input)
-      ).map(entry => entry.word);
+   //   const allDict = getCombinedDictionary();
+   //   const dictMatches = allDict.filter(entry => 
+      //  entry.word && entry.word.toLowerCase().includes(input)
+   //   ).map(entry => entry.word);
       
       // Combine and deduplicate
-      suggestions = [...new Set([...historyMatches, ...dictMatches])].slice(0, 7);
+      //suggestions = [...new Set([...historyMatches, ...dictMatches])].slice(0, 7);
       
-      suggestions.forEach(word => {
-        const item = document.createElement("div");
-        item.className = "suggestion-item";
-        item.innerHTML = `
-          <span class="material-icons" style="font-size:18px;margin-right:8px;">
-            ${historyMatches.includes(word) ? 'history' : 'search'}
-          </span>
-          ${word}
-        `;
-        item.onclick = () => {
-          document.getElementById("searchInput").value = word;
-          document.getElementById("suggestionBox").innerHTML = "";
-          searchWord();
-        };
-        document.getElementById("suggestionBox").appendChild(item);
-      });
-    }
+//suggestions.forEach(word => {
+      //  const item = document.createElement("div");
+       // item.className = "suggestion-item";
+       // item.innerHTML = `
+         // <span class="material-icons" style="font-size:18px;margin-right:8px;">
+         //   ${historyMatches.includes(word) ? 'history' : 'search'}
+        //  </span>
+      //    ${word}
+  //      `;
+   ///     item.onclick = () => {
+//   document.getElementById("searchInput").value = word;
+     //     document.getElementById("suggestionBox").innerHTML = "";
+//  searchWord();
+  //  };
+  //      document.getElementById("suggestionBox").appendChild(item);
+  //    });
+   // }
 
     function displayResult(result) {
       if (!result || !result.word) {
