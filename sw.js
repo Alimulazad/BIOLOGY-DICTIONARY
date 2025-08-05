@@ -3,7 +3,7 @@ const CACHE_NAME = 'biology-dictionary-cache-v1';
 const urlsToCache = [
   '/',
   '/index.html',
-  '/dictionary.js'
+  '/index.js'
 ];
 
 self.addEventListener('install', event => {
